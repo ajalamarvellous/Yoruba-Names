@@ -6,6 +6,14 @@ class Tokenizer:
     def __init__(self):
         self.class_to_label = {}
         self.label_to_class = {}
+        self.vowels_2_map = dict([
+            ('à', 'à'), ('á', 'á'), ('á', 'á'), ('è', 'è'), ('è', 'è'), ('é', 'é'),
+            ('é', 'é'), ('é', 'é'), ('é', 'é'), ('ì', 'ì'), ('í', 'í'), ('í', 'í'),
+            ('ò', 'ò'), ('ò', 'ò'), ('ó', 'ó'), ('ó', 'ó'), ('ó', 'ó'), ('ó', 'ó'),
+            ('ù', 'ù'), ('ú', 'ú'), ('ú', 'ú'), ('ẹ́', 'ẹ́'), ('ẹ́', 'ẹ́'), ('ọ́', 'ọ́'),
+            ('ọ́', 'ọ́'), ('ṣ', 'ṣ'), ('s̩', 'ṣ'), ('ș', 'ṣ'), ('ń', 'ń'), ('ń', 'ń'),
+            ('ḿ', 'ḿ')
+ ])
 
 
     def preprocess(self , name: str) -> list:
@@ -38,3 +46,10 @@ class Tokenizer:
             else:
                 n += 1
         return name
+    
+    
+    def map_vowels(self, word: list, map_table=self.vowels_2_map) -> list:
+        for i, char in enumerate(word):
+            if char in map_table.keys():
+                word[i] = map_table[char]
+        return word
