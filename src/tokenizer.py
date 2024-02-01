@@ -90,3 +90,14 @@ class Tokenizer:
             else:
                 n += 1
         return name
+
+
+    def create_vocabulary(self, words: list) -> list:
+        """
+        create a character vocabulary of all characters in the whole dataset
+        """
+        self.vocabulary = []
+        for word in words:
+            self.vocabulary.extend(self.preprocess(word))
+
+        self.vocabulary = list(set(self.vocabulary))
