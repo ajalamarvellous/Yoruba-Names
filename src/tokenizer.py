@@ -53,3 +53,40 @@ class Tokenizer:
             if char in map_table.keys():
                 word[i] = map_table[char]
         return word
+    
+    def n_char(self, name: list) -> list:
+        """ 
+        Some N-gram char occurs in Yoruba, while they are made of multiple chars
+        e.g "gb" or vowels such as "an, in, en, on, un", they are regarded as just 
+        a single character in Yoruba, so this function identify cases where this happens
+        return the n-gram characters as one
+        """
+        vowels = [
+            'a', 'à', 'á', 'è', 'é', 'e', 'ẹ́', 'ẹ̀', 'ẹ', 'ì', 'í', 'i', 
+            'ò', 'ó', 'o', 'ọ́', 'ọ̀', 'ọ', 'ù', 'ú', 'u',]
+        n = 0
+        len_word = len(name)
+        # iterate through the name charaterwise
+        while n < len_word:
+            # check  if the char is "n" and the characteer before is a vowel
+            if (name[n] == "n") and (n != 0) and (name[n-1] in vowels):
+                # most times, when the next char after the n is a vowel and the char before 
+                # is also a vowel, the "n" char is usualy independent of the one before
+                if (n+1 < len_word) and (name[n+1] in vowels):
+                    n += 1
+                else:
+                    # yes, make the last char evaluated the vowel and 'n'
+                    name[n-1] = name[n-1] + name[n]
+                    # delete the "n" char and reduce the length of the list by 1
+                    del name[n]
+                    len_word -= 1
+            # also check if the char is b and if true, if the letter before is "g"
+            elif (name[n] == "b") and (n != 0) and (name[n-1] == "g"):
+                # yes, its a variant of letter pronounced as "gb"
+                name[n-1] = name[n-1] + name[n]
+                # delete the "b" char and reduce the length of the list by 1
+                del name[n]
+                len_word -= 1
+            else:
+                n += 1
+        return name
