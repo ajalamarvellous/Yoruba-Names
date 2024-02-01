@@ -3,9 +3,9 @@ This tokeniser is an heuristic based character wise tokeniser for Yoruba words
 """
 
 class Tokenizer:
-    def __init__(self):
-        self.class_to_label = {}
-        self.label_to_class = {}
+    def __init__(self, dataset=None):
+        self.char_to_token = {}
+        self.token_to_char = {}
         self.vowels_2_map = dict([
             ('à', 'à'), ('á', 'á'), ('á', 'á'), ('è', 'è'), ('è', 'è'), ('é', 'é'),
             ('é', 'é'), ('é', 'é'), ('é', 'é'), ('ì', 'ì'), ('í', 'í'), ('í', 'í'),
@@ -14,6 +14,8 @@ class Tokenizer:
             ('ọ́', 'ọ́'), ('ṣ', 'ṣ'), ('s̩', 'ṣ'), ('ș', 'ṣ'), ('ń', 'ń'), ('ń', 'ń'),
             ('ḿ', 'ḿ')
  ])
+        if dataset != None:
+            self.get_tokens_mapping(dataset)
 
 
     def preprocess(self , name: str) -> list:
@@ -101,3 +103,15 @@ class Tokenizer:
             self.vocabulary.extend(self.preprocess(word))
 
         self.vocabulary = list(set(self.vocabulary))
+
+
+    def get_tokens_mapping(self, words: list) -> None:
+        """ 
+        Create a mapping for each character to a unique token
+        """
+        self.create_vocabulary(words)
+        for i, char in enumerate(self.vocabulary):
+            # character to token mapping
+            self.char_to_token[char] = i
+            # token to character mapping
+            self.token_to_char[i] = char
