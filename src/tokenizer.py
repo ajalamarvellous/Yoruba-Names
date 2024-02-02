@@ -122,6 +122,20 @@ class Tokenizer:
             # token to character mapping
             self.token_to_char[i] = char
 
+
+    def get_char_to_token(self, chars: list) -> list:
+        """ 
+        Returns the tokens for the different characters
+        """
+        return [self.char_to_token[char] for char in chars]
+    
+
+    def get_token_to_char(self, tokens: list) -> list:
+        """ 
+        Returns the tokens for the different characters
+        """
+        return [self.token_to_char[token] for token in tokens]
+    
     
     def __call__(self, data: list, pad: bool=False, max_length: Union[str, int, None]="max_length") -> list:
         """ 
@@ -140,13 +154,11 @@ class Tokenizer:
             # if the value is neither an int or max_length, raise an exception
             else:
                 raise Exception("Invalid value for max_length")
-
         
         # if tokens are not intialised, initialise
         if not self.tokens_initialised:
             self.get_tokens_mapping(data)
 
-        
         for word in data:
             # preprocesss the tokens
             word = self.preprocess(word)
@@ -160,5 +172,4 @@ class Tokenizer:
         if pad:
             for i in range(len(all_tokens)):
                 all_tokens[i] = self.pad_sequence(all_tokens[i])
-
         return all_tokens
