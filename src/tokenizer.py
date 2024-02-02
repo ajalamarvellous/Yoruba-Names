@@ -122,6 +122,13 @@ class Tokenizer:
             # token to character mapping
             self.token_to_char[i] = char
 
+        self.char_to_token["PAD"] = 999
+        self.token_to_char[999] = "PAD"
+        self.char_to_token["BEG"] = -1
+        self.token_to_char[-1] = "BEG"
+        self.char_to_token["END"] = -2
+        self.token_to_char[-2] = "END"
+
 
     def get_char_to_token(self, chars: list) -> list:
         """ 
@@ -137,6 +144,23 @@ class Tokenizer:
         return [self.token_to_char[token] for token in tokens]
     
     
+    def pad_sequence(self, tokens: list) -> list:
+        """
+        Pad the sequence to the desired length
+        """
+        padded_token = []
+        # ascertain the shorter between the max_length and token length
+        # the max_token will be shorted if the tokens aree to be truncated
+        shortest = min(self.max_length_, len(tokens))
+        padded_token[:shortest] = tokens[:shortest]
+        # if the tokens are to be padded, max_length > token length
+        if shortest < self.max_length_:
+            padded_token[shortest:self.max_length_] = (
+                [self.char_to_token["PAD"]] * (self.max_length_ - shortest)
+                )
+        return padded_token
+    
+
     def __call__(self, data: list, pad: bool=False, max_length: Union[str, int, None]="max_length") -> list:
         """ 
         Tokenise and return tokens to the words given
@@ -170,6 +194,10 @@ class Tokenizer:
             all_tokens.append(tokens)
 
         if pad:
+            # padd sequence if padding selected as true
             for i in range(len(all_tokens)):
                 all_tokens[i] = self.pad_sequence(all_tokens[i])
+        # Add special tokens at the beginning and end 
+        all_tokens.insert(0, self.char_to_token["BEG"])
+        all_tokens.append(self.char_to_token["END"]) 
         return all_tokens
