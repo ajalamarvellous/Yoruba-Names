@@ -1,9 +1,10 @@
 """
 This tokeniser is an heuristic based character wise tokeniser for Yoruba words
 """
+from typing import Union
 
 class Tokenizer:
-    def __init__(self, dataset=None):
+    def __init__(self, dataset=None, vocabulary=None):
         self.char_to_token = {}
         self.token_to_char = {}
         self.vowels_2_map = dict([
@@ -14,8 +15,10 @@ class Tokenizer:
             ('ọ́', 'ọ́'), ('ṣ', 'ṣ'), ('s̩', 'ṣ'), ('ș', 'ṣ'), ('ń', 'ń'), ('ń', 'ń'),
             ('ḿ', 'ḿ')
  ])
-        if dataset != None:
-            self.get_tokens_mapping(dataset)
+        self.tokens_initialised = False
+        if dataset != None or vocabulary != None:
+            self.get_tokens_mapping(dataset, vocabulary)
+            self.tokens_initialised = True
 
 
     def preprocess(self , name: str) -> list:
@@ -94,7 +97,7 @@ class Tokenizer:
         return name
 
 
-    def create_vocabulary(self, words: list) -> list:
+    def create_vocabulary(self, words: list) -> None:
         """
         create a character vocabulary of all characters in the whole dataset
         """
@@ -105,13 +108,57 @@ class Tokenizer:
         self.vocabulary = list(set(self.vocabulary))
 
 
-    def get_tokens_mapping(self, words: list) -> None:
+    def get_tokens_mapping(self, words: Union[list, None], vocabulary: Union[list, None]) -> None:
         """ 
         Create a mapping for each character to a unique token
         """
-        self.create_vocabulary(words)
+        if words != None:
+            self.create_vocabulary(words)
+        elif vocabulary != None:
+            self.vocabulary = vocabulary
         for i, char in enumerate(self.vocabulary):
             # character to token mapping
             self.char_to_token[char] = i
             # token to character mapping
             self.token_to_char[i] = char
+
+    
+    def __call__(self, data: list, pad: bool=False, max_length: Union[str, int, None]="max_length") -> list:
+        """ 
+        Tokenise and return tokens to the words given
+        """
+        all_tokens = []
+        # check if tokens needs to be padded
+        if pad:
+            # if yes, ascertain that max_lenth is not None
+            assert max_length != None, "Maximum length needs to be specified if pad set as True"
+            # if max_length set for longest token, initatilise for zero else set as value specified
+            if max_length == "max_length":
+                self.max_length_ = 0
+            elif type(max_length, int):
+                self.max_length_ = max_length
+            # if the value is neither an int or max_length, raise an exception
+            else:
+                raise Exception("Invalid value for max_length")
+
+        
+        # if tokens are not intialised, initialise
+        if not self.tokens_initialised:
+            self.get_tokens_mapping(data)
+
+        
+        for word in data:
+            # preprocesss the tokens
+            word = self.preprocess(word)
+            # convert to tokens
+            tokens = self.get_char_to_token(word)
+            # get longest sequence lenght yet if pad and use max_length
+            if pad and max_length == "max_length" and len(tokens) < self.max_length_:
+                self.max_length_ = len(tokens)
+            all_tokens.append(tokens)
+
+        if pad:
+            for i in range(len(all_tokens)):
+                all_tokens[i] = self.pad_sequence(all_tokens[i])
+
+        return all_tokens
